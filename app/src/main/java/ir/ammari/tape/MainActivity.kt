@@ -1,8 +1,6 @@
 package ir.ammari.tape
 
 import android.os.Bundle
-import android.widget.Toast
-
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -14,34 +12,47 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextField
+import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
+import android.widget.Toast
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 
 import ir.ammari.tape.ui.theme.TapeTheme
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         setContent {
             TapeTheme {
+
+                val context = LocalContext.current
+
+                var openDialog by rememberSaveable { mutableStateOf(false) }
+                var text by rememberSaveable { mutableStateOf("") }
+
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     floatingActionButton = {
-                        val context = LocalContext.current
-
                         FloatingActionButton(
                             onClick = {
-                                Toast.makeText(
-                                    context,
-                                    "FAB Clicked",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                openDialog = true
                             }
                         ) {
                             Icon(
@@ -51,9 +62,57 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 ) { innerPadding ->
+
                     MainScreen(
                         modifier = Modifier.padding(innerPadding)
                     )
+
+                    if (openDialog) {
+                        AlertDialog(
+                            onDismissRequest = {
+                                openDialog = false
+                            },
+                            title = {
+                                Text("Enter a playlist name")
+                            },
+                            text = {
+                                TextField(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    value = text,
+                                    onValueChange = {
+                                        text = it
+                                    },
+                                    keyboardOptions = KeyboardOptions(
+                                        keyboardType = KeyboardType.Text
+                                    )
+                                )
+                            },
+                            confirmButton = {
+                                TextButton(
+                                    onClick = {
+                                        openDialog = false
+
+                                        Toast.makeText(
+                                            context,
+                                            text,
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                ) {
+                                    Text("Confirm")
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(
+                                    onClick = {
+                                        openDialog = false
+                                    }
+                                ) {
+                                    Text("Dismiss")
+                                }
+                            }
+                        )
+                    }
                 }
             }
         }
